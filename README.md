@@ -34,7 +34,9 @@ fable doctor
 
 ## Update
 
-Re-run the same install command. It downloads the latest release and replaces the binary. Your data in `~/.fable` is kept.
+Re-run the same install command to reinstall the same release (or set
+`FABLE_VERSION`, e.g. `FABLE_VERSION=v0.0.1`, to install a different
+release). Your data in `~/.fable` is kept.
 
 ## Uninstall
 
