@@ -19,7 +19,11 @@
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
 # is kept unless you delete it yourself.
 # Windows is NOT covered by this script: use install.ps1 instead.
-set -eu
+# Strict mode, minus nounset: macOS ships bash 3.2, whose `set -u` reports
+# variables assigned by command substitution as "unbound" (FILE at the
+# download step on macOS arm64). The explicit [ -n ... ] || die checks
+# below are the real validation and give a clear error instead.
+set -e
 
 VERSION="${FABLE_VERSION:-v0.0.1}"
 REPO="leonnett/fable-install"
@@ -79,6 +83,9 @@ mkdir -p "$TMP_DIR"
 VERSIONS_URL="https://raw.githubusercontent.com/$REPO/$VERSION/versions.json"
 say "Fetching release metadata ($VERSIONS_URL)…"
 curl -fsSL "$VERSIONS_URL" -o "$TMP_DIR/versions.json" || die "Could not download versions.json for $VERSION. Check your network connection."
+ASSET_JSON=""
+FILE=""
+EXPECTED_SHA=""
 ASSET_JSON="$(grep -o "\"$PLATFORM_KEY\":{[^}]*}" "$TMP_DIR/versions.json" || true)"
 [ -n "$ASSET_JSON" ] || die "No binary listed for platform '$PLATFORM_KEY' in $VERSION. See https://github.com/$REPO/releases for supported platforms."
 FILE="$(printf '%s' "$ASSET_JSON" | sed -n 's/.*"file":"\([^"]*\)".*/\1/p')"
