@@ -19,7 +19,7 @@
 #      into $env:LOCALAPPDATA\FableCode\bin, adds that folder to your user
 #      PATH, then verifies with `fable --version`.
 #
-# To install a different release, set $env:FABLE_VERSION (e.g. v0.0.1).
+# To install a different release, set $env:FABLE_VERSION (e.g. v0.0.2).
 # To update later, re-run this same command. To uninstall, delete
 # fable.exe and tera.exe from the bin folder; your data in %USERPROFILE%\.fable
 # is kept unless you delete it yourself.
@@ -30,7 +30,7 @@ $ErrorActionPreference = "Stop"
 function Say($msg) { Write-Host "[fable] $msg" }
 function Die($msg) { throw "[fable] ERROR: $msg" }
 
-$version = if ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.0.1" }
+$version = if ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.0.2" }
 $repo = "leonnett/fable-install"
 $binDir = if ($env:FABLE_BIN_DIR) { $env:FABLE_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "FableCode\bin" }
 

@@ -14,7 +14,7 @@
 #   4. Installs it as `fable` (plus the compatibility alias `tera`) into
 #      $HOME/.local/bin, then verifies it with `fable --version`.
 #
-# To install a different release, set FABLE_VERSION (e.g. v0.0.1).
+# To install a different release, set FABLE_VERSION (e.g. v0.0.2).
 # To update later, re-run this same command. To uninstall, delete
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
 # is kept unless you delete it yourself.
@@ -25,7 +25,7 @@
 # below are the real validation and give a clear error instead.
 set -e
 
-VERSION="${FABLE_VERSION:-v0.0.1}"
+VERSION="${FABLE_VERSION:-v0.0.2}"
 REPO="leonnett/fable-install"
 BIN_DIR="${FABLE_BIN_DIR:-$HOME/.local/bin}"
 TMP_DIR="${TMPDIR:-/tmp}/fable-install-$$"
