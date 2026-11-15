@@ -17,7 +17,7 @@
 #      $HOME/.local/bin, adds that folder to your shell PATH if needed,
 #      then verifies it with `fable --version`.
 #
-# To install a different release, set FABLE_VERSION (e.g. v0.0.4).
+# To install a different release, set FABLE_VERSION (e.g. v0.0.5).
 # To update later, re-run this same command. To uninstall, delete
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
 # is kept unless you delete it yourself.
@@ -34,7 +34,7 @@
 #   download never reaches the `main` call, so nothing runs half-way.
 set -e
 
-VERSION="${FABLE_VERSION:-v0.0.4}"
+VERSION="${FABLE_VERSION:-v0.0.5}"
 REPO="leonnett/fable-install"
 BIN_DIR="${FABLE_BIN_DIR:-$HOME/.local/bin}"
 TMP_DIR="${TMPDIR:-/tmp}/fable-install-$$"
