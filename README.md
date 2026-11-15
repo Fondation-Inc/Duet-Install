@@ -35,7 +35,7 @@ fable doctor
 ## Update
 
 Re-run the same install command to reinstall the same release (or set
-`FABLE_VERSION`, e.g. `FABLE_VERSION=v0.0.2`, to install a different
+`FABLE_VERSION`, e.g. `FABLE_VERSION=v0.0.3`, to install a different
 release). Your data in `~/.fable` is kept.
 
 ## Uninstall
