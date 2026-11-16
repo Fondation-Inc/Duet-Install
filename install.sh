@@ -39,7 +39,7 @@
 #   download never reaches the `main` call, so nothing runs half-way.
 set -e
 
-VERSION="${FABLE_VERSION:-v0.0.7}"
+VERSION="${FABLE_VERSION:-v0.0.8}"
 REPO="leonnett/fable-install"
 BIN_DIR="${FABLE_BIN_DIR:-$HOME/.local/bin}"
 TMP_DIR="${TMPDIR:-/tmp}/fable-install-$$"
