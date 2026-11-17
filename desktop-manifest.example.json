@@ -1,0 +1,59 @@
+{
+  "example": true,
+  "status": "template-only-replace-checksums-at-release",
+  "release": "desktop-v0.0.1",
+  "version": "0.0.1",
+  "channel": "duet",
+  "repository": "leonnett/duet-install",
+  "releaseBaseUrl": "https://github.com/leonnett/duet-install/releases/download/desktop-v0.0.1",
+  "checksumsFile": "SHA256SUMS.txt",
+  "assets": {
+    "darwin-arm64": {
+      "file": "Duet-0.0.1-arm64.dmg",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT",
+      "updaterFeed": "duet-mac.yml"
+    },
+    "darwin-x64": {
+      "file": "Duet-0.0.1-x64.dmg",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT",
+      "updaterFeed": "duet-mac.yml"
+    },
+    "windows-x64": {
+      "file": "Duet-0.0.1-x64.exe",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT",
+      "updaterFeed": "duet.yml"
+    },
+    "linux-x64": {
+      "file": "Duet-0.0.1-x64.AppImage",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT",
+      "updaterFeed": "duet-linux.yml"
+    },
+    "linux-arm64": {
+      "file": "Duet-0.0.1-arm64.AppImage",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT",
+      "updaterFeed": "duet-linux.yml",
+      "archUpdaterFeed": "duet-linux-arm64.yml"
+    }
+  },
+  "updaterManifests": {
+    "mac": {
+      "file": "duet-mac.yml",
+      "channel": "duet",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT"
+    },
+    "win": {
+      "file": "duet.yml",
+      "channel": "duet",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT"
+    },
+    "linux": {
+      "file": "duet-linux.yml",
+      "channel": "duet",
+      "sha256": "REPLACE_WITH_REAL_SHA256_FROM_SHA256SUMS_TXT"
+    }
+  },
+  "verification": {
+    "checksums": "SHA256SUMS.txt",
+    "note": "Example layout only. Populate real SHA-256 digests and electron-updater SHA-512 YAML feeds from signed desktop-v0.0.1 build artifacts at release time."
+  }
+}
