@@ -97,6 +97,6 @@ Supported platforms:
 
 ## Status
 
-- macOS/Linux installer: verified on Linux x64 for v0.0.8 (anonymous install, `fable --version`, `fable --help`, `fable doctor`). The v0.1.0 Duet installer flow (install as `duet` + `fable`/`tera` aliases) was verified locally against a simulated release — see the PR. It has **not** been run against the real v0.1.0 release yet; that check runs right after the release is published.
+- macOS/Linux installer: verified on Linux x64 for v0.1.0 (anonymous install via the published release, `duet --version` and `fable --version` both print `0.1.0`, `duet doctor` exit 0; installed as `duet` with `fable`/`tera` aliases).
 - Windows installer: written from the macOS/Linux installer; **not tested on real Windows yet**. Treat it as untested until someone runs it on Windows and confirms `duet --version`.
 - The other platform binaries are published from the same build and their file formats were verified, but they were not executed on their native platforms here.
