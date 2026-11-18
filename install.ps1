@@ -1,45 +1,52 @@
-# Fable Code installer for Windows (PowerShell).
+# Duet installer for Windows (PowerShell).
 #
 # One-line install (run in Windows PowerShell, not as Administrator):
-#   irm https://fable.fondation.ink/install.ps1 | iex
+#   irm https://duet.lat/install.ps1 | iex
+#
+# Transition: duet.lat is not pointed at the installer yet, so the same
+# file is also served at https://fable.fondation.ink/install.ps1 — use
+# either URL until the DNS cutover, then duet.lat is canonical.
 #
 # STATUS: NOT TESTED — written from the macOS/Linux installer, but never
 # executed on Windows (no Windows machine was available in this
 # environment). Do not present the Windows path as verified until someone
-# runs it on real Windows and confirms `fable --version` prints a version.
+# runs it on real Windows and confirms `duet --version` prints a version.
 #
 # What it does:
 #   1. Detects your CPU (x64/arm64).
-#   2. Downloads the matching prebuilt Fable Code binary from the public
-#      release in leonnett/fable-install — no source checkout, no build,
+#   2. Downloads the matching prebuilt Duet binary from the public
+#      release in leonnett/duet-install — no source checkout, no build,
 #      no git, no account needed.
 #   3. Verifies the download's SHA-256 checksum against versions.json from
 #      the same release, and refuses to install on any mismatch.
-#   4. Installs it as fable.exe (plus the compatibility alias tera.exe)
-#      into $env:LOCALAPPDATA\FableCode\bin, adds that folder to your user
-#      PATH, then verifies with `fable --version`.
+#   4. Installs it as duet.exe (plus the compatibility aliases fable.exe
+#      and tera.exe) into $env:LOCALAPPDATA\FableCode\bin, adds that
+#      folder to your user PATH, then verifies with `duet --version`.
 #
-# To install a different release, set $env:FABLE_VERSION (e.g. v0.0.5).
+# To install a different release, set $env:DUET_VERSION (e.g. v0.1.0).
+# $env:FABLE_VERSION still works as a fallback.
 # To update later, re-run this same command. To uninstall, delete
-# fable.exe and tera.exe from the bin folder; your data in %USERPROFILE%\.fable
-# is kept unless you delete it yourself.
+# duet.exe, fable.exe and tera.exe from the bin folder; your data in
+# %USERPROFILE%\.fable is kept unless you delete it yourself.
 # Requires Windows 10 version 1809 or later.
 # If Windows gives trouble, WSL2 + the Unix installer is the fallback.
 $ErrorActionPreference = "Stop"
 
-function Say($msg) { Write-Host "[fable] $msg" }
-function Die($msg) { throw "[fable] ERROR: $msg" }
+function Say($msg) { Write-Host "[duet] $msg" }
+function Die($msg) { throw "[duet] ERROR: $msg" }
 
-$version = if ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.0.5" }
-$repo = "leonnett/fable-install"
-$binDir = if ($env:FABLE_BIN_DIR) { $env:FABLE_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "FableCode\bin" }
+$version = if ($env:DUET_VERSION) { $env:DUET_VERSION } elseif ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.1.0" }
+$repo = "leonnett/duet-install"
+# The folder name FableCode is kept on purpose: existing installs already
+# have it on their user PATH, and moving it would break their updates.
+$binDir = if ($env:DUET_BIN_DIR) { $env:DUET_BIN_DIR } elseif ($env:FABLE_BIN_DIR) { $env:FABLE_BIN_DIR } else { Join-Path $env:LOCALAPPDATA "FableCode\bin" }
 
 # --- platform ---------------------------------------------------------------
 $arch = $env:PROCESSOR_ARCHITECTURE
 if ($arch -eq "ARM64") { $platformKey = "windows-arm64" }
 elseif ($arch -eq "AMD64") { $platformKey = "windows-x64" }
 else { Die "Unsupported CPU architecture: $arch" }
-Say "Installing Fable Code $version on Windows ($platformKey)."
+Say "Installing Duet $version on Windows ($platformKey)."
 
 # --- release metadata -------------------------------------------------------
 # versions.json is the single source of truth for file names and checksums.
@@ -57,7 +64,7 @@ $expectedSha = $asset.sha256
 if (-not $file -or -not $expectedSha) { Die "Could not read the file name or checksum for '$platformKey' from versions.json." }
 
 # --- download + verify ------------------------------------------------------
-$tmpDir = Join-Path $env:TEMP ("fable-install-" + [Guid]::NewGuid().ToString("N"))
+$tmpDir = Join-Path $env:TEMP ("duet-install-" + [Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
 try {
   $downloadUrl = "https://github.com/$repo/releases/download/$version/$file"
@@ -72,8 +79,12 @@ try {
 
   # --- install --------------------------------------------------------------
   New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+  Copy-Item -Path $tmpFile -Destination (Join-Path $binDir "duet.exe") -Force
+  # Compatibility aliases: the CLI was previously called Fable Code
+  # (command `fable`), and before that Tera (command `tera`). Both keep
+  # working as copies of `duet` so existing scripts and muscle memory
+  # do not break.
   Copy-Item -Path $tmpFile -Destination (Join-Path $binDir "fable.exe") -Force
-  # Compatibility alias: the CLI was previously called Tera.
   Copy-Item -Path $tmpFile -Destination (Join-Path $binDir "tera.exe") -Force
 } finally {
   Remove-Item -Recurse -Force -Path $tmpDir -ErrorAction SilentlyContinue
@@ -91,14 +102,14 @@ $env:Path = "$binDir;" + $env:Path
 
 # --- verify -----------------------------------------------------------------
 Say "Verifying the install…"
-$installedVersion = & (Join-Path $binDir "fable.exe") --version
-Say "fable --version: $installedVersion"
-& (Join-Path $binDir "fable.exe") --help | Out-Null
-if ($LASTEXITCODE -ne 0) { Die "'fable --help' failed after install." }
-Say "Installed Fable Code $installedVersion ($version, $platformKey)."
+$installedVersion = & (Join-Path $binDir "duet.exe") --version
+Say "duet --version: $installedVersion"
+& (Join-Path $binDir "duet.exe") --help | Out-Null
+if ($LASTEXITCODE -ne 0) { Die "'duet --help' failed after install." }
+Say "Installed Duet $installedVersion ($version, $platformKey)."
 Say "Next steps:"
-Say "  fable login     Sign in with your Fable account"
-Say "  fable --help    See all commands"
+Say "  duet login      Sign in with your Fable account"
+Say "  duet --help     See all commands"
 Say "  Docs: https://www.fondation.ink/fable/docs/fable-code/install/"
 Say "Update later by re-running this same installer."
 Say "NOTE: this Windows installer has NOT been tested on Windows yet."

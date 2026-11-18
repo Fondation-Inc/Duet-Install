@@ -1,29 +1,34 @@
 #!/bin/sh
-# Fable Code installer for macOS and Linux.
+# Duet installer for macOS and Linux.
 # One-line install:
-#   curl -fsSL https://fable.fondation.ink/install.sh | bash
+#   curl -fsSL https://duet.lat/install.sh | bash
+#
+# Transition: duet.lat is not pointed at the installer yet, so the same
+# file is also served at https://fable.fondation.ink/install.sh — use
+# either URL until the DNS cutover, then duet.lat is canonical.
 #
 # What it does (nothing hidden):
 #   1. Detects your OS (macOS/Linux) and CPU (x64/arm64), and on Linux
 #      whether you use glibc or musl (Alpine).
 #   2. Downloads versions.json (the release manifest) for the release
-#      and resolves the matching prebuilt Fable Code binary from the
-#      public release in leonnett/fable-install — no source checkout,
+#      and resolves the matching prebuilt Duet binary from the
+#      public release in leonnett/duet-install — no source checkout,
 #      no build, no git, no account needed.
 #   3. Downloads the binary.
 #   4. Verifies the download's SHA-256 checksum against versions.json
 #      from the same release, and refuses to install on any mismatch.
-#   5. Installs it as `fable` (plus the compatibility alias `tera`) into
-#      $HOME/.local/bin, adds that folder to your shell PATH if needed,
-#      then verifies it with `fable --version`.
+#   5. Installs it as `duet` (plus the compatibility aliases `fable`
+#      and `tera`) into $HOME/.local/bin, adds that folder to your
+#      shell PATH if needed, then verifies it with `duet --version`.
 #
 # What you see is deliberately little: a short header, a quiet
 # "Installing…" while it works, and one line when it is done. Every check
 # above still happens — it just stays silent unless something fails, in
 # which case you get one short, plain message and nothing is installed.
 #
-# To install a different release, set FABLE_VERSION (e.g. v0.0.5).
-# To update later, re-run this same command. To uninstall, delete
+# To install a different release, set DUET_VERSION (e.g. v0.1.0).
+# FABLE_VERSION still works as a fallback. To update later, re-run this
+# same command. To uninstall, delete $HOME/.local/bin/duet,
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
 # is kept unless you delete it yourself.
 # Windows is NOT covered by this script: use install.ps1 instead.
@@ -39,10 +44,10 @@
 #   download never reaches the `main` call, so nothing runs half-way.
 set -e
 
-VERSION="${FABLE_VERSION:-v0.0.9}"
-REPO="leonnett/fable-install"
-BIN_DIR="${FABLE_BIN_DIR:-$HOME/.local/bin}"
-TMP_DIR="${TMPDIR:-/tmp}/fable-install-$$"
+VERSION="${DUET_VERSION:-${FABLE_VERSION:-v0.1.0}}"
+REPO="leonnett/duet-install"
+BIN_DIR="${DUET_BIN_DIR:-${FABLE_BIN_DIR:-$HOME/.local/bin}}"
+TMP_DIR="${TMPDIR:-/tmp}/duet-install-$$"
 SPINNER_PID=""
 
 say() { printf '%s\n' "$*"; }
@@ -91,8 +96,8 @@ cleanup() { stop_spinner; rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
 main() {
-  say "Fable Code"
-  say "──────────"
+  say "Duet"
+  say "────"
   start_spinner
 
   # --- platform -----------------------------------------------------------
@@ -111,7 +116,7 @@ main() {
   # Linux libc: musl (Alpine and friends) needs its own binary.
   LIBC=""
   if [ "$OS" = "Linux" ]; then
-    if [ "${FABLE_INSTALL_MUSL:-}" = "1" ]; then
+    if [ "${DUET_INSTALL_MUSL:-${FABLE_INSTALL_MUSL:-}}" = "1" ]; then
       LIBC="-musl"
     elif ldd --version 2>&1 | grep -qi musl; then
       LIBC="-musl"
@@ -126,7 +131,7 @@ main() {
   esac
 
   # --- prerequisites ------------------------------------------------------
-  command -v curl >/dev/null 2>&1 || die "curl is needed to install Fable Code. Install curl, then try again."
+  command -v curl >/dev/null 2>&1 || die "curl is needed to install Duet. Install curl, then try again."
   if command -v sha256sum >/dev/null 2>&1; then
     SHA_CMD="sha256sum"
   elif command -v shasum >/dev/null 2>&1; then
@@ -157,10 +162,14 @@ main() {
 
   # --- install ------------------------------------------------------------
   mkdir -p "$BIN_DIR" 2>/dev/null || die "Something went wrong. Please try again."
-  cp "$TMP_DIR/$FILE" "$BIN_DIR/fable" 2>/dev/null || die "Something went wrong. Please try again."
-  chmod +x "$BIN_DIR/fable" 2>/dev/null || die "Something went wrong. Please try again."
-  # Compatibility alias: the CLI was previously called Tera.
-  ln -sf fable "$BIN_DIR/tera" 2>/dev/null || true
+  cp "$TMP_DIR/$FILE" "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. Please try again."
+  chmod +x "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. Please try again."
+  # Compatibility aliases: the CLI was previously called Fable Code
+  # (command `fable`), and before that Tera (command `tera`). Both keep
+  # working as symlinks to `duet` so existing scripts and muscle memory
+  # do not break.
+  ln -sf duet "$BIN_DIR/fable" 2>/dev/null || true
+  ln -sf duet "$BIN_DIR/tera" 2>/dev/null || true
 
   # --- PATH ---------------------------------------------------------------
   # Add BIN_DIR to the shell startup file only when it is not already on
@@ -202,21 +211,21 @@ main() {
   esac
 
   # --- verify -------------------------------------------------------------
-  "$BIN_DIR/fable" --version >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
-  "$BIN_DIR/fable" --help >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
+  "$BIN_DIR/duet" --version >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
+  "$BIN_DIR/duet" --help >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
 
   # --- done ---------------------------------------------------------------
   stop_spinner
   if [ "$PATH_NOTE" = "restart" ]; then
     say "✓ Installed"
-    say "Restart your terminal, then run \`fable\`."
+    say "Restart your terminal, then run \`duet\`."
   elif [ "$PATH_NOTE" = "manual" ]; then
     say "✓ Installed"
-    say "Add $BIN_DIR to your PATH, then run \`fable\`."
+    say "Add $BIN_DIR to your PATH, then run \`duet\`."
   else
-    say "✓ Installed — run \`fable\`"
+    say "✓ Installed — run \`duet\`"
   fi
-  say "Need help? Run \`fable help\` or visit fable.fondation.ink"
+  say "Need help? Run \`duet help\` or visit duet.lat"
 }
 
 main "$@"
