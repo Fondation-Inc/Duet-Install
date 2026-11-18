@@ -26,7 +26,7 @@
 # above still happens — it just stays silent unless something fails, in
 # which case you get one short, plain message and nothing is installed.
 #
-# To install a different release, set DUET_VERSION (e.g. v0.0.10).
+# To install a different release, set DUET_VERSION (e.g. v0.1.0).
 # FABLE_VERSION still works as a fallback. To update later, re-run this
 # same command. To uninstall, delete $HOME/.local/bin/duet,
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
@@ -44,7 +44,7 @@
 #   download never reaches the `main` call, so nothing runs half-way.
 set -e
 
-VERSION="${DUET_VERSION:-${FABLE_VERSION:-v0.0.10}}"
+VERSION="${DUET_VERSION:-${FABLE_VERSION:-v0.1.0}}"
 REPO="leonnett/duet-install"
 BIN_DIR="${DUET_BIN_DIR:-${FABLE_BIN_DIR:-$HOME/.local/bin}}"
 TMP_DIR="${TMPDIR:-/tmp}/duet-install-$$"

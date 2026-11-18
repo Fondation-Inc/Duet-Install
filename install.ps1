@@ -23,7 +23,7 @@
 #      and tera.exe) into $env:LOCALAPPDATA\FableCode\bin, adds that
 #      folder to your user PATH, then verifies with `duet --version`.
 #
-# To install a different release, set $env:DUET_VERSION (e.g. v0.0.10).
+# To install a different release, set $env:DUET_VERSION (e.g. v0.1.0).
 # $env:FABLE_VERSION still works as a fallback.
 # To update later, re-run this same command. To uninstall, delete
 # duet.exe, fable.exe and tera.exe from the bin folder; your data in
@@ -35,7 +35,7 @@ $ErrorActionPreference = "Stop"
 function Say($msg) { Write-Host "[duet] $msg" }
 function Die($msg) { throw "[duet] ERROR: $msg" }
 
-$version = if ($env:DUET_VERSION) { $env:DUET_VERSION } elseif ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.0.10" }
+$version = if ($env:DUET_VERSION) { $env:DUET_VERSION } elseif ($env:FABLE_VERSION) { $env:FABLE_VERSION } else { "v0.1.0" }
 $repo = "leonnett/duet-install"
 # The folder name FableCode is kept on purpose: existing installs already
 # have it on their user PATH, and moving it would break their updates.

@@ -7,9 +7,8 @@ Fable is the sole provider. Duet runs on Fable's own models: **Lune I** and **Fr
 This repository contains **only** the installer. It contains no Duet source code.
 
 > This repository was previously named `fable-install`. The GitHub repo
-> rename to `duet-install` is in progress; the installer already points
-> at the new name, so do not cut the v0.0.10 release until the rename
-> has landed.
+> rename to `duet-install` has landed; the installer points at the new
+> name. v0.1.0 is the first release published as Duet.
 
 ## Install
 
@@ -45,7 +44,7 @@ duet doctor
 ## Update
 
 Re-run the same install command to reinstall the same release (or set
-`DUET_VERSION`, e.g. `DUET_VERSION=v0.0.10`, to install a different
+`DUET_VERSION`, e.g. `DUET_VERSION=v0.1.0`, to install a different
 release; `FABLE_VERSION` still works as a fallback). Your data in
 `~/.fable` is kept.
 
@@ -91,15 +90,13 @@ Supported platforms:
 | Windows x64 | `duet-bun-windows-x64.exe` |
 | Windows arm64 | `duet-bun-windows-arm64.exe` |
 
-> v0.0.10 note: the `sha256` values in `versions.json` are still the
-> v0.0.9 binary hashes — the v0.0.10 binaries do not exist yet. They
-> MUST be regenerated from the real v0.0.10 release assets before the
-> release is published. The installer refuses to install on any
-> checksum mismatch, so a stale hash can never install a wrong binary;
-> it just fails closed.
+> v0.1.0 note: the `sha256` values in `versions.json` are the real
+> v0.1.0 binary hashes, generated from the published release assets.
+> The installer refuses to install on any checksum mismatch, so a
+> stale hash can never install a wrong binary; it just fails closed.
 
 ## Status
 
-- macOS/Linux installer: verified on Linux x64 for v0.0.8 (anonymous install, `fable --version`, `fable --help`, `fable doctor`). The v0.0.10 Duet installer flow (install as `duet` + `fable`/`tera` aliases) was verified locally against a simulated release — see the PR. It has **not** been run against the real v0.0.10 release yet, because that release does not exist.
+- macOS/Linux installer: verified on Linux x64 for v0.0.8 (anonymous install, `fable --version`, `fable --help`, `fable doctor`). The v0.1.0 Duet installer flow (install as `duet` + `fable`/`tera` aliases) was verified locally against a simulated release — see the PR. It has **not** been run against the real v0.1.0 release yet; that check runs right after the release is published.
 - Windows installer: written from the macOS/Linux installer; **not tested on real Windows yet**. Treat it as untested until someone runs it on Windows and confirms `duet --version`.
 - The other platform binaries are published from the same build and their file formats were verified, but they were not executed on their native platforms here.
