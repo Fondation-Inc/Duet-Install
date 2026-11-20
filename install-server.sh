@@ -1392,11 +1392,16 @@ main() {
   cp -R "$TMP_DIR/stage" "$RELEASE_STAGE_DIR"
 
   if [ -e "$RELEASE_FINAL_DIR" ]; then
+    # Keep `current` pointing at a complete release while the version dir is swapped.
+    RELEASE_TRANSIT_DIR="$SERVER_DIR/releases/.transit-${RESOLVED_VERSION}-$$"
+    rm -rf "$RELEASE_TRANSIT_DIR"
+    cp -R "$RELEASE_STAGE_DIR" "$RELEASE_TRANSIT_DIR"
+    ln -sfn "releases/.transit-${RESOLVED_VERSION}-$$" "$SERVER_DIR/current"
     mv "$RELEASE_FINAL_DIR" "$RELEASE_BACKUP_DIR"
   fi
   mv "$RELEASE_STAGE_DIR" "$RELEASE_FINAL_DIR"
   ln -sfn "releases/${RESOLVED_VERSION}" "$SERVER_DIR/current"
-  rm -rf "$RELEASE_BACKUP_DIR"
+  rm -rf "$RELEASE_BACKUP_DIR" "${RELEASE_TRANSIT_DIR:-}"
 
   ln -sfn "$SERVER_DIR/current/bin/duet-server" "$BIN_DIR/duet-server"
 
