@@ -1202,9 +1202,8 @@ main() {
   DEFAULT_MANIFEST_URL="https://github.com/${REPO}/releases/download/${RELEASE_TAG}/server-manifest.json"
   MANIFEST_URL="${DUET_SERVER_MANIFEST_URL:-$DEFAULT_MANIFEST_URL}"
 
-  TMP_DIR="${TMPDIR:-/tmp}/duet-server-install-$$"
-  mkdir -p "$TMP_DIR" || die "INSTALL_FAILED" "Unable to create temporary directory $TMP_DIR." "Check TMPDIR permissions and available disk space."
-  chmod 0700 "$TMP_DIR" 2>/dev/null || true
+  TMP_DIR="$(umask 077 && mktemp -d "${TMPDIR:-/tmp}/duet-server-install.XXXXXXXX" 2>/dev/null)" \
+    || die "INSTALL_FAILED" "Unable to create a private temporary directory under ${TMPDIR:-/tmp}." "Check TMPDIR permissions and available disk space."
 
   # Preflight validations
   run_preflight
