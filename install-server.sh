@@ -46,7 +46,6 @@ DISTRO_ID=""
 DISTRO_LIKE=""
 DOWNLOADER=""
 CURL_SUPPORTS_PROTO="0"
-WGET_SUPPORTS_HTTPS_ONLY="0"
 SHA_TOOL=""
 HAS_TAR="0"
 HAS_UNZIP="0"
@@ -267,46 +266,38 @@ http_fetch_to_file() {
   : > "$_err_log"
 
   if [ "$DOWNLOADER" = "curl" ]; then
-    if [ "$CURL_SUPPORTS_PROTO" = "1" ]; then
-      case "$_url" in
-        https://*)
-          if curl -fsSL --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 300 "$_url" -o "$_out" 2>"$_err_log"; then
-            return 0
-          fi
-          ;;
-        http://*)
-          if curl -fsSL --proto '=http,https' --proto-redir '=http,https' --connect-timeout 15 --max-time 300 "$_url" -o "$_out" 2>"$_err_log"; then
-            return 0
-          fi
-          ;;
-      esac
-    else
-      if curl -fsSL --connect-timeout 15 --max-time 300 "$_url" -o "$_out" 2>"$_err_log"; then
-        return 0
-      fi
+    if [ "$CURL_SUPPORTS_PROTO" != "1" ]; then
+      die "MISSING_TOOL" "Installed curl cannot restrict redirects to HTTPS (--proto-redir)." "Upgrade curl to 7.20.2 or newer, or install GNU wget."
     fi
+    case "$_url" in
+      https://*)
+        if curl -fsSL --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 300 "$_url" -o "$_out" 2>"$_err_log"; then
+          return 0
+        fi
+        ;;
+      http://*)
+        if curl -fsSL --proto '=http,https' --proto-redir '=http,https' --connect-timeout 15 --max-time 300 "$_url" -o "$_out" 2>"$_err_log"; then
+          return 0
+        fi
+        ;;
+    esac
   else
-    if [ "$WGET_SUPPORTS_HTTPS_ONLY" = "1" ]; then
+    # wget cannot refuse HTTPS->HTTP redirects, so record server responses (-S)
+    # and discard the download if any redirect left HTTPS.
+    if wget -q -S --timeout=20 -O "$_out" "$_url" 2>"$_err_log"; then
       case "$_url" in
         https://*)
-          if wget -q --https-only --timeout=20 -O "$_out" "$_url" 2>"$_err_log"; then
-            return 0
-          fi
-          ;;
-        http://*)
-          if wget -q --timeout=20 -O "$_out" "$_url" 2>"$_err_log"; then
-            return 0
+          if grep -qi '^[[:space:]]*Location:[[:space:]]*http://' "$_err_log"; then
+            rm -f "$_out"
+            die "INSECURE_URL" "Download of ${_label} from ${_url} was redirected to plain HTTP." "Use curl, or check for a proxy or network rewriting HTTPS redirects."
           fi
           ;;
       esac
-    else
-      if wget -q -O "$_out" "$_url" 2>"$_err_log"; then
-        return 0
-      fi
+      return 0
     fi
   fi
 
-  _detail="$(tr '\n' ' ' < "$_err_log" 2>/dev/null | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//' || true)"
+  _detail="$(grep -v '^  ' "$_err_log" 2>/dev/null | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//' || true)"
   if [ -z "$_detail" ]; then
     _detail="request failed"
   fi
@@ -620,9 +611,6 @@ run_preflight() {
     fi
   elif command -v wget >/dev/null 2>&1; then
     DOWNLOADER="wget"
-    if wget --help 2>&1 | grep -q -- '--https-only'; then
-      WGET_SUPPORTS_HTTPS_ONLY="1"
-    fi
   else
     die "MISSING_TOOL" "Neither 'curl' nor 'wget' is installed." "$(pkg_install_hint "curl ca-certificates" "curl ca-certificates" "curl ca-certificates" "curl ca-certificates" "curl ca-certificates")"
   fi
