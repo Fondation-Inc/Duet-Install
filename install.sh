@@ -3,10 +3,6 @@
 # One-line install:
 #   curl -fsSL https://duet.lat/install.sh | bash
 #
-# Transition: duet.lat is not pointed at the installer yet, so the same
-# file is also served at https://fable.fondation.ink/install.sh — use
-# either URL until the DNS cutover, then duet.lat is canonical.
-#
 # What it does (nothing hidden):
 #   1. Detects your OS (macOS/Linux) and CPU (x64/arm64), and on Linux
 #      whether you use glibc or musl (Alpine).

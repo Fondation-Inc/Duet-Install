@@ -24,11 +24,6 @@ Windows (PowerShell, not as Administrator):
 irm https://duet.lat/install.ps1 | iex
 ```
 
-Transition: `duet.lat` is not pointed at the installer yet. Until the
-DNS cutover, the same files are also served at
-`https://fable.fondation.ink/install.sh` and
-`https://fable.fondation.ink/install.ps1`.
-
 The installer downloads the prebuilt Duet binary for your platform from this repository's GitHub release, verifies its SHA-256 checksum, and installs it as `duet` in your user bin directory (`~/.local/bin` on macOS/Linux, `%LOCALAPPDATA%\FableCode\bin` on Windows). It also installs `fable` and `tera` as compatibility aliases for the same binary. The Windows folder name `FableCode` is kept on purpose: existing installs already have it on their user PATH.
 
 No source checkout, no build step, no account needed to install. No other software is installed.

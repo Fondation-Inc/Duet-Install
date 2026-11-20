@@ -3,10 +3,6 @@
 # One-line install (run in Windows PowerShell, not as Administrator):
 #   irm https://duet.lat/install.ps1 | iex
 #
-# Transition: duet.lat is not pointed at the installer yet, so the same
-# file is also served at https://fable.fondation.ink/install.ps1 — use
-# either URL until the DNS cutover, then duet.lat is canonical.
-#
 # STATUS: NOT TESTED — written from the macOS/Linux installer, but never
 # executed on Windows (no Windows machine was available in this
 # environment). Do not present the Windows path as verified until someone
