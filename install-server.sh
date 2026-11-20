@@ -237,7 +237,12 @@ validate_url() {
       fi
       _rest="${_url#http://}"
       _authority="${_rest%%/*}"
+      _authority="${_authority%%\?*}"
+      _authority="${_authority%%#*}"
       case "$_authority" in
+        *@*)
+          die "INSECURE_URL" "Refusing ${_label} URL with credentials in the host: $_url" "Remove user info from the URL; plain http:// is permitted only for loopback (127.0.0.1 / localhost / [::1]) test overrides."
+          ;;
         127.0.0.1|127.0.0.1:*|localhost|localhost:*|"[::1]"|"[::1]":*)
           RESULT_URL_IS_LOCAL_HTTP="1"
           return 0
