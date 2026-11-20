@@ -114,7 +114,9 @@ Structured NDJSON mode (used by Duet Desktop's SSH **Add your own server** flow)
 curl -fsSL https://duet.lat/install-server.sh | DUET_JSON=1 bash
 ```
 
-Until `duet.lat` DNS cutover is complete, the same script is hosted directly in this repository (`https://raw.githubusercontent.com/leonnett/duet-install/main/install-server.sh`).
+`https://duet.lat/install-server.sh` serves `install-server.sh` from this repository's `main` branch.
+
+> **Status:** no `server-v*` release with `server-manifest.json` and `duet-server` bundles has been published yet, so a default run passes preflight and then stops with `SERVER_RELEASE_NOT_FOUND`. Installs work once `server-v0.0.1` is published (or with `DUET_SERVER_MANIFEST_URL` pointing at a valid manifest).
 
 ### What `install-server.sh` checks and installs
 
@@ -125,7 +127,7 @@ Until `duet.lat` DNS cutover is complete, the same script is hosted directly in 
    - SSH sanity hints if `~/.ssh` is not mode `0700` or `~/.ssh/authorized_keys` is not mode `0600`.
    - Service supervision detection: `systemd --user` (`~/.config/systemd/user/duet-server.service`) when a user systemd bus is active, or a portable container/`nohup` supervisor script (`~/.duet/server/duet-server-supervisor.sh`) otherwise.
 2. **Verified download & atomic install**:
-   - Fetches `server-manifest.json` from `https://github.com/leonnett/duet-install/releases/download/<version>/server-manifest.json` (overridable via `DUET_SERVER_VERSION` and `DUET_SERVER_MANIFEST_URL`).
+   - Fetches `server-manifest.json` from `https://github.com/Fondation-Inc/Duet-Install/releases/download/<version>/server-manifest.json` (overridable via `DUET_SERVER_VERSION` and `DUET_SERVER_MANIFEST_URL`).
    - Enforces strict `https://` URLs for all remote fetches (plain `http://` is rejected unless pointing at loopback `127.0.0.1` / `localhost` / `[::1]` for local testing).
    - Verifies SHA-256 (fail closed on mismatch before extraction or installation) and runs `duet-server --version` before swapping `~/.duet/server/current` and linking `~/.local/bin/duet-server`.
    - Re-runs are idempotent: existing `~/.duet/server/{data,config,logs,run}` state, PATH entries, and service unit files are preserved without duplication.

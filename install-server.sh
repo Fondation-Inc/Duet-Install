@@ -11,7 +11,7 @@
 #   DUET_JSON=1                 Emit single-line NDJSON progress/error events on stdout.
 #   DUET_SERVER_VERSION=...     Release tag or version to install (default: server-v0.0.1).
 #   DUET_SERVER_MANIFEST_URL=.. Override manifest JSON URL (HTTPS required; loopback HTTP allowed for local tests).
-#   DUET_SERVER_REPO=...        GitHub owner/repo for releases (default: leonnett/duet-install).
+#   DUET_SERVER_REPO=...        GitHub owner/repo for releases (default: Fondation-Inc/Duet-Install).
 #   DUET_SERVER_DIR=...         Install directory (default: $HOME/.duet/server).
 #   DUET_BIN_DIR=...            User bin directory for duet-server symlink (default: $HOME/.local/bin).
 #   DUET_ENROLL_TOKEN=...       Optional enrollment token (never written to logs or stdout).
@@ -28,7 +28,7 @@
 #   truncated piped download (`curl ... | bash`) never executes partially.
 set -e
 
-DEFAULT_REPO="leonnett/duet-install"
+DEFAULT_REPO="Fondation-Inc/Duet-Install"
 DEFAULT_VERSION="server-v0.0.1"
 DEFAULT_MIN_DISK_MB="500"
 DEFAULT_MIN_NODE_VERSION="22.12.0"
@@ -306,6 +306,19 @@ http_fetch_to_file() {
     _detail="request failed"
   fi
   die "$_err_code" "Failed to download ${_label} from ${_url}: ${_detail}" "Verify outbound connectivity, TLS CA certificates, and that ${_url} is reachable, or set DUET_SERVER_VERSION / DUET_SERVER_MANIFEST_URL."
+}
+
+# Returns 1 only when the server definitively answers 404; any other outcome
+# (success, network error, other HTTP status) is left to http_fetch_to_file.
+http_probe_exists() {
+  _probe_url="$1"
+  _status=""
+  if [ "$DOWNLOADER" = "curl" ]; then
+    _status="$(curl -sSL -o /dev/null -w '%{http_code}' --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 60 "$_probe_url" 2>/dev/null || true)"
+  else
+    _status="$(wget -S --spider --timeout=20 "$_probe_url" 2>&1 | awk '/^  HTTP\//{code=$2} END{print code}' || true)"
+  fi
+  [ "$_status" != "404" ]
 }
 
 compute_sha256() {
@@ -1210,6 +1223,9 @@ main() {
   say "Fetching server manifest..."
 
   MANIFEST_PATH="$TMP_DIR/server-manifest.json"
+  if [ -z "${DUET_SERVER_MANIFEST_URL:-}" ] && ! http_probe_exists "$MANIFEST_URL"; then
+    die "SERVER_RELEASE_NOT_FOUND" "Duet Server ${RELEASE_TAG} is not published at ${MANIFEST_URL}." "Check https://github.com/${REPO}/releases for a published server-v* release and set DUET_SERVER_VERSION, or set DUET_SERVER_MANIFEST_URL."
+  fi
   http_fetch_to_file "$MANIFEST_URL" "$MANIFEST_PATH" "MANIFEST_FETCH_FAILED" "server manifest"
 
   PARSED_PATH="$TMP_DIR/manifest.parsed"
