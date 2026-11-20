@@ -858,12 +858,12 @@ setup_service() {
     SERVICE_FILE="$SERVER_DIR/duet-server.service"
     write_systemd_unit "$SERVICE_FILE" "$_bin_path"
     if is_truthy "${DUET_START_SERVICE:-}" && ! is_truthy "${DUET_NO_START:-}"; then
-      "$SUPERVISOR_SCRIPT" start >/dev/null 2>&1 || true
+      "$SUPERVISOR_SCRIPT" restart >/dev/null 2>&1 || true
     fi
   else
     SERVICE_FILE="$SUPERVISOR_SCRIPT"
     if is_truthy "${DUET_START_SERVICE:-}" && ! is_truthy "${DUET_NO_START:-}"; then
-      "$SUPERVISOR_SCRIPT" start >/dev/null 2>&1 || true
+      "$SUPERVISOR_SCRIPT" restart >/dev/null 2>&1 || true
     fi
   fi
 }
