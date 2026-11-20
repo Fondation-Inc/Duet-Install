@@ -960,13 +960,22 @@ perform_enrollment() {
       fi
       rm -f "$_enroll_cfg" "$_enroll_body"
     else
-      _auth_hdr="Authorization: Bearer $(printf '%s' "$_token" | tr -d '\r\n')"
-      if ! wget -q --timeout=30 --header="$_auth_hdr" --header="Content-Type: application/json" --post-file="$_enroll_body" -O "$_enroll_resp" "$_enroll_url" 2>"$_enroll_err"; then
-        _edetail="$(tr '\n' ' ' < "$_enroll_err" 2>/dev/null || true)"
+      # Pass the token through a private wgetrc so it never appears in argv.
+      if ! wget --version 2>/dev/null | grep -q 'GNU Wget'; then
         rm -f "$_enroll_body"
+        die "MISSING_TOOL" "Token enrollment needs curl or GNU wget to send the token privately." "$(pkg_install_hint "curl ca-certificates" "curl ca-certificates" "curl ca-certificates" "curl ca-certificates" "curl ca-certificates")"
+      fi
+      _enroll_wgetrc="$TMP_DIR/enroll-wgetrc"
+      (
+        umask 077
+        printf 'header = Authorization: Bearer %s\n' "$(printf '%s' "$_token" | tr -d '\r\n')" > "$_enroll_wgetrc"
+      )
+      if ! WGETRC="$_enroll_wgetrc" wget -q --timeout=30 --header="Content-Type: application/json" --post-file="$_enroll_body" -O "$_enroll_resp" "$_enroll_url" 2>"$_enroll_err"; then
+        _edetail="$(tr '\n' ' ' < "$_enroll_err" 2>/dev/null || true)"
+        rm -f "$_enroll_wgetrc" "$_enroll_body"
         die "ENROLL_FAILED" "Server enrollment request to ${_enroll_url} failed: ${_edetail:-request error}" "Verify your enrollment token is valid, you have fewer than 5 registered Duet computers, and ${_enroll_url} is reachable."
       fi
-      rm -f "$_enroll_body"
+      rm -f "$_enroll_wgetrc" "$_enroll_body"
     fi
 
     ENROLLED="true"
