@@ -728,6 +728,10 @@ is_running() {
       ''|*[!0-9]*) return 1 ;;
     esac
     if kill -0 "\$_pid" 2>/dev/null; then
+      # Guard against PID reuse after a crash or reboot.
+      if [ -r "/proc/\$_pid/cmdline" ] && ! tr '\\000' ' ' < "/proc/\$_pid/cmdline" 2>/dev/null | grep -q 'duet-server'; then
+        return 1
+      fi
       return 0
     fi
   fi
@@ -750,6 +754,14 @@ case "\$cmd" in
     if is_running; then
       _pid="\$(cat "\$PID_FILE")"
       kill "\$_pid" 2>/dev/null || true
+      _waited=0
+      while kill -0 "\$_pid" 2>/dev/null && [ "\$_waited" -lt 20 ]; do
+        sleep 0.5 2>/dev/null || sleep 1
+        _waited=\$((_waited + 1))
+      done
+      if kill -0 "\$_pid" 2>/dev/null; then
+        kill -9 "\$_pid" 2>/dev/null || true
+      fi
       rm -f "\$PID_FILE"
       printf 'duet-server stopped (pid %s)\n' "\$_pid"
     else
