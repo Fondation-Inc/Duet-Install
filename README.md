@@ -98,62 +98,23 @@ Supported platforms:
 
 ---
 
-## Duet Server Bootstrap (`install-server.sh`)
+## Duet Server Setup (`install-server.sh`)
 
-Idempotent one-line bootstrap for connecting a Linux host (`x64` or `arm64`, `glibc` or `musl`) to **Duet Desktop** as one of your **5 registered Duet computers** and running Vault/agent sync.
-
-Interactive terminal:
+Links a Linux server to the Duet app. In the app, open **Add your own server**; it shows a setup code. On the server:
 
 ```sh
-curl -fsSL https://duet.lat/install-server.sh | bash
+curl -fsSL https://duet.lat/install-server.sh | sh -s -- <code> --cloudflare
 ```
 
-Structured NDJSON mode (used by Duet Desktop's SSH **Add your own server** flow):
+(`--tailscale`, `--ssh` or `--relay` pick another way for the app to reach the server.)
 
-```sh
-curl -fsSL https://duet.lat/install-server.sh | DUET_JSON=1 bash
-```
+`install-server.sh` checks the code and runs the setup script the Duet link service serves for it (`<link>/s/<code>[/<way>]`, or `<link>/i/<token>` for the app's long token). That script installs the server and reports each step to the app. The server build is private: the link service hands it only to the setup session the code names, so this repository publishes no server release and the script installs nothing without a code.
 
-`https://duet.lat/install-server.sh` serves `install-server.sh` from this repository's `main` branch.
-
-> **Status:** no `server-v*` release with `server-manifest.json` and `duet-server` bundles has been published yet, so a default run passes preflight and then stops with `SERVER_RELEASE_NOT_FOUND`. Installs work once `server-v0.0.1` is published (or with `DUET_SERVER_MANIFEST_URL` pointing at a valid manifest).
-
-### What `install-server.sh` checks and installs
-
-1. **Preflight checks** with actionable, package-manager-aware remediation (`--check-only` runs preflight without downloading):
-   - Linux OS, CPU architecture (`x86_64`/`amd64` -> `x64`, `aarch64`/`arm64` -> `arm64`), and `glibc` vs `musl` detection.
-   - Required tools (`curl` or `wget`, `sha256sum` or `shasum`, and `tar`/`unzip` when extracting archives).
-   - Disk space check via `df -Pm` ensuring at least `500` MB free in `$HOME` (and `$PREFIX` if set), failing with `DISK_FULL` when insufficient.
-   - SSH sanity hints if `~/.ssh` is not mode `0700` or `~/.ssh/authorized_keys` is not mode `0600`.
-   - Service supervision detection: `systemd --user` (`~/.config/systemd/user/duet-server.service`) when a user systemd bus is active, or a portable container/`nohup` supervisor script (`~/.duet/server/duet-server-supervisor.sh`) otherwise.
-2. **Verified download & atomic install**:
-   - Fetches `server-manifest.json` from `https://github.com/Fondation-Inc/Duet-Install/releases/download/<version>/server-manifest.json` (overridable via `DUET_SERVER_VERSION` and `DUET_SERVER_MANIFEST_URL`).
-   - Enforces strict `https://` URLs for all remote fetches (plain `http://` is rejected unless pointing at loopback `127.0.0.1` / `localhost` / `[::1]` for local testing).
-   - Verifies SHA-256 (fail closed on mismatch before extraction or installation) and runs `duet-server --version` before swapping `~/.duet/server/current` and linking `~/.local/bin/duet-server`.
-   - Re-runs are idempotent: existing `~/.duet/server/{data,config,logs,run}` state, PATH entries, and service unit files are preserved without duplication.
-3. **Enrollment & JSON events**:
-   - Optional `--enroll-token` / `DUET_ENROLL_URL` enrollment (tokens are never logged or emitted to stdout/state files), or prints next steps to link the host as 1 of your 5 registered Duet computers and start Vault/agent sync.
-   - With `DUET_JSON=1` (or `--json`), emits single-line JSON events (`preflight`, `warning`, `download`, `verify`, `install`, `enroll`, `ready`, `error`).
-
-### Environment overrides & tests
-
-| Variable | Purpose | Default |
-| --- | --- | --- |
-| `DUET_JSON` | Set `1` to emit single-line NDJSON events on stdout | `0` |
-| `DUET_SERVER_VERSION` | Release tag or version to install | `server-v0.0.1` |
-| `DUET_SERVER_MANIFEST_URL` | Override manifest JSON URL (staged rollouts / local tests) | GitHub release manifest |
-| `DUET_SERVER_DIR` | Installation root preserving `data/` and `config/` | `~/.duet/server` |
-| `DUET_BIN_DIR` | Target directory for the `duet-server` symlink | `~/.local/bin` |
-| `DUET_ENROLL_TOKEN` | Optional enrollment bearer token (also `--enroll-token`) | unset |
-| `DUET_ENROLL_URL` | Optional enrollment endpoint (also `--enroll-url`) | unset |
-
-Verify locally with the mock HTTP test suite (cleans up `/tmp` automatically):
+`DUET_LINK_BASE` overrides the link service (default `https://link.dusk.bot`, the one the Duet app uses; plain `http://` is allowed only for loopback tests).
 
 ```sh
 ./scripts/test-install-server.sh
 ```
-
----
 
 ## Duet Desktop Release Channel (`desktop-v0.0.1`)
 
