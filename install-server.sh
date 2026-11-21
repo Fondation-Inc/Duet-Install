@@ -66,7 +66,8 @@ SCRIPT="$TMP/setup.sh"
 got=""
 for family in "" -4 "" -4 ""; do
   # shellcheck disable=SC2086
-  if curl -fsSL $family --proto "$PROTO" --proto-redir "$PROTO" -m 60 -o "$SCRIPT" "$URL" 2>"$TMP/err"; then
+  # The URL carries the setup credential, so it goes to curl on stdin, not in argv.
+  if printf 'url = "%s"\n' "$URL" | curl -fsSL $family --proto "$PROTO" --proto-redir "$PROTO" -m 60 -o "$SCRIPT" -K - 2>"$TMP/err"; then
     got=1
     break
   fi
