@@ -92,6 +92,12 @@ cleanup() { stop_spinner; rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
 main() {
+  case "${1:-}" in
+    --with-computer) COMPUTER_SETUP=1; shift ;;
+    "") COMPUTER_SETUP="${DUET_INSTALL_COMPUTER:-0}" ;;
+    *) die "Usage: install.sh [--with-computer]" ;;
+  esac
+  [ "$#" -eq 0 ] || die "Usage: install.sh [--with-computer]"
   say "Duet"
   say "────"
   start_spinner
@@ -102,6 +108,12 @@ main() {
     Darwin|Linux) ;;
     *) die "Sorry, this installer is for macOS and Linux. On Windows, use install.ps1." ;;
   esac
+  if [ "$COMPUTER_SETUP" = 1 ]; then
+    [ "$OS" = Linux ] && [ "$(id -u)" != 0 ] ||
+      die "Computer setup requires a normal Linux user session."
+    command -v bwrap >/dev/null 2>&1 ||
+      die "Install Bubblewrap 0.11 or newer from your Linux distribution, then rerun this installer."
+  fi
   ARCH="$(uname -m)"
   case "$ARCH" in
     arm64|aarch64) ARCH_NAME="arm64" ;;
@@ -212,6 +224,11 @@ main() {
 
   # --- done ---------------------------------------------------------------
   stop_spinner
+  if [ "$COMPUTER_SETUP" = 1 ]; then
+    say "Preparing Linux Computer…"
+    "$BIN_DIR/duet" computer prepare ||
+      die "Duet CLI is installed, but Computer setup failed. Use a release with Computer support and a compatible Linux system."
+  fi
   if [ "$PATH_NOTE" = "restart" ]; then
     say "✓ Installed"
     say "Restart your terminal, then run \`duet\`."
