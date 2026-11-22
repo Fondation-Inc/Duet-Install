@@ -30,17 +30,19 @@ No source checkout, no build step, no account needed to install. No system packa
 
 ### Linux Computer setup
 
-On Linux with a systemd user session, cgroup v2 and unprivileged user namespaces,
-install Bubblewrap 0.11 or newer from your distribution, then use a Duet release
-that includes Computer:
+On Linux with a systemd user session, cgroup v2 and unprivileged user and mount
+namespaces, install Bubblewrap 0.11 or newer, curl, util-linux, squashfs-tools,
+e2fsprogs, and TigerVNC Viewer (`vncviewer`) from your distribution. Then use a
+Duet release that includes the shared Computer:
 
 ```sh
 curl -fsSL https://duet.lat/install.sh | bash -s -- --with-computer
 ```
 
-The installer prepares the verified Alpine workspace image without sudo.
-The first Computer action in Duet CLI or Desktop starts the private service.
-For an existing CLI installation, run `duet computer prepare` instead.
+The installer prepares a verified Alpine image and requests administrator access
+to configure persistent storage. Run `duet computer view` to start the one
+private desktop shared by all your bots; no administrator access is needed to open it.
+For an existing CLI installation, run `duet computer prepare` first.
 
 ## Verify
 
