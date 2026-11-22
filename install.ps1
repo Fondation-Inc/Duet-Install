@@ -27,6 +27,8 @@
 # Requires Windows 10 version 1809 or later.
 # If Windows gives trouble, WSL2 + the Unix installer is the fallback.
 $ErrorActionPreference = "Stop"
+$stagedFile = $null
+$tmpFile = $null
 
 function Say($msg) { Write-Host "[duet] $msg" }
 function Die($msg) { throw "[duet] ERROR: $msg" }
