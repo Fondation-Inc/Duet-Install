@@ -38,7 +38,10 @@ if ($PSVersionTable.PSVersion.Major -le 5) {
 }
 if (-not $version) {
   try {
-    $latest = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$repo/releases/latest" -TimeoutSec 30
+    $latest = & {
+      $ProgressPreference = 'SilentlyContinue'
+      Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$repo/releases/latest" -TimeoutSec 30
+    }
     $latestUrl = if ($latest.BaseResponse.ResponseUri) { $latest.BaseResponse.ResponseUri.AbsoluteUri } else { $latest.BaseResponse.RequestMessage.RequestUri.AbsoluteUri }
     if ($latestUrl -notmatch '/releases/tag/([^/]+)$') { throw "No release tag in redirect" }
     $version = $Matches[1]
@@ -61,7 +64,10 @@ Say "Installing Duet $version on Windows ($platformKey)."
 $versionsUrl = "https://raw.githubusercontent.com/$repo/$version/versions.json"
 Say "Fetching release metadata ($versionsUrl)..."
 try {
-  $versions = Invoke-RestMethod -Uri $versionsUrl
+  $versions = & {
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-RestMethod -Uri $versionsUrl
+  }
 } catch {
   Die "Could not download versions.json for $version. Check your network connection."
 }
@@ -78,7 +84,10 @@ try {
   $downloadUrl = "https://github.com/$repo/releases/download/$version/$file"
   $tmpFile = Join-Path $tmpDir $file
   Say "Downloading $file..."
-  Invoke-WebRequest -UseBasicParsing -Uri $downloadUrl -OutFile $tmpFile -TimeoutSec 300
+  & {
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -UseBasicParsing -Uri $downloadUrl -OutFile $tmpFile -TimeoutSec 300
+  }
   Say "Verifying SHA-256 checksum..."
   $actualSha = (Get-FileHash -Algorithm SHA256 -Path $tmpFile).Hash.ToLower()
   if ($actualSha -ne $expectedSha.ToLower()) {
