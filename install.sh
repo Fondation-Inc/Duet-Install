@@ -8,7 +8,7 @@
 #      whether you use glibc or musl (Alpine).
 #   2. Downloads versions.json (the release manifest) for the release
 #      and resolves the matching prebuilt Duet binary from the
-#      public release in leonnett/duet-install — no source checkout,
+#      public release in Fondation-Inc/Duet-Install — no source checkout,
 #      no build, no git, no account needed.
 #   3. Downloads the binary.
 #   4. Verifies the download's SHA-256 checksum against versions.json
@@ -25,7 +25,7 @@
 # To install a different release, set DUET_VERSION (e.g. v0.1.0).
 # FABLE_VERSION still works as a fallback. To update later, re-run this
 # same command. To uninstall, delete $HOME/.local/bin/duet,
-# $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.fable
+# $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.duet
 # is kept unless you delete it yourself.
 # Windows is NOT covered by this script: use install.ps1 instead.
 #
@@ -40,10 +40,11 @@
 #   download never reaches the `main` call, so nothing runs half-way.
 set -e
 
-VERSION="${DUET_VERSION:-${FABLE_VERSION:-v0.1.0}}"
-REPO="leonnett/duet-install"
+VERSION="${DUET_VERSION:-${FABLE_VERSION:-}}"
+REPO="Fondation-Inc/Duet-Install"
 BIN_DIR="${DUET_BIN_DIR:-${FABLE_BIN_DIR:-$HOME/.local/bin}}"
-TMP_DIR="${TMPDIR:-/tmp}/duet-install-$$"
+TMP_DIR=""
+STAGED_BIN=""
 SPINNER_PID=""
 
 say() { printf '%s\n' "$*"; }
@@ -88,8 +89,19 @@ die() {
   exit 1
 }
 
-cleanup() { stop_spinner; rm -rf "$TMP_DIR"; }
+cleanup() { stop_spinner; [ -z "$TMP_DIR" ] || rm -rf "$TMP_DIR"; [ -z "$STAGED_BIN" ] || rm -f "$STAGED_BIN"; }
 trap cleanup EXIT
+
+download() {
+  HTTP_CODE="$(curl -fsSL --retry 2 --connect-timeout 10 --max-time 300 -w '%{http_code}' "$1" -o "$2" 2>/dev/null)" && return 0
+  case "$HTTP_CODE" in
+    404) die "Sorry, this release or download could not be found (HTTP 404). Check DUET_VERSION and try again." ;;
+    [45][0-9][0-9]) die "Sorry, the download server returned HTTP $HTTP_CODE. Please try again later." ;;
+    *) die "Sorry, the download didn't work. Check your connection and try again." ;;
+  esac
+}
+
+shell_quote() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
 
 main() {
   say "Duet"
@@ -138,34 +150,48 @@ main() {
 
   # --- release metadata ---------------------------------------------------
   # versions.json is the single source of truth for file names and checksums.
-  mkdir -p "$TMP_DIR" 2>/dev/null || die "Something went wrong. Please try again."
+  TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/duet-install.XXXXXXXXXX")" || die "Something went wrong. Please try again."
+  if [ -z "$VERSION" ]; then
+    LATEST_URL="$(curl -fsSL --retry 2 --connect-timeout 10 --max-time 30 -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" 2>/dev/null)" || LATEST_URL=""
+    case "$LATEST_URL" in
+      https://github.com/*/releases/tag/?*) VERSION="${LATEST_URL##*/}" ;;
+      *) VERSION="v0.1.0" ;;
+    esac
+  fi
   VERSIONS_URL="https://raw.githubusercontent.com/$REPO/$VERSION/versions.json"
-  curl -fsSL "$VERSIONS_URL" -o "$TMP_DIR/versions.json" 2>/dev/null || die "Sorry, the download didn't work. Check your connection and try again."
+  download "$VERSIONS_URL" "$TMP_DIR/versions.json"
   ASSET_JSON=""
-  ASSET_JSON="$(grep -o "\"$PLATFORM_KEY\":{[^}]*}" "$TMP_DIR/versions.json" || true)"
+  ASSET_JSON="$(tr '\n\r' '  ' < "$TMP_DIR/versions.json" | grep -o "\"$PLATFORM_KEY\"[[:space:]]*:[[:space:]]*{[^}]*}" || true)"
   [ -n "$ASSET_JSON" ] || die "Sorry, there's no download for this computer yet."
   FILE=""
   EXPECTED_SHA=""
-  FILE="$(printf '%s' "$ASSET_JSON" | sed -n 's/.*"file":"\([^"]*\)".*/\1/p')"
-  EXPECTED_SHA="$(printf '%s' "$ASSET_JSON" | sed -n 's/.*"sha256":"\([^"]*\)".*/\1/p')"
+  FILE="$(printf '%s' "$ASSET_JSON" | sed -n 's/.*"file"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
+  EXPECTED_SHA="$(printf '%s' "$ASSET_JSON" | sed -n 's/.*"sha256"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')"
   [ -n "$FILE" ] && [ -n "$EXPECTED_SHA" ] || die "Sorry, the download didn't work. Check your connection and try again."
 
   # --- download + verify --------------------------------------------------
   DOWNLOAD_URL="https://github.com/$REPO/releases/download/$VERSION/$FILE"
-  curl -fsSL "$DOWNLOAD_URL" -o "$TMP_DIR/$FILE" 2>/dev/null || die "Sorry, the download didn't work. Check your connection and try again."
+  case "$FILE" in */*|.|..) die "Sorry, the release contains an invalid file name." ;; esac
+  download "$DOWNLOAD_URL" "$TMP_DIR/$FILE"
   ACTUAL_SHA="$(cd "$TMP_DIR" && $SHA_CMD "$FILE" | awk '{print $1}')"
   [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ] || die "Sorry, the download could not be verified. Nothing was installed. Please try again."
 
   # --- install ------------------------------------------------------------
   mkdir -p "$BIN_DIR" 2>/dev/null || die "Something went wrong. Please try again."
-  cp "$TMP_DIR/$FILE" "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. Please try again."
-  chmod +x "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. Please try again."
+  STAGED_BIN="$(mktemp "$BIN_DIR/.duet.XXXXXXXXXX")" || die "Something went wrong. Please try again."
+  cp "$TMP_DIR/$FILE" "$STAGED_BIN" 2>/dev/null || die "Something went wrong. Please try again."
+  chmod +x "$STAGED_BIN" 2>/dev/null || die "Something went wrong. Please try again."
+  INSTALLED_VERSION="$("$STAGED_BIN" --version 2>/dev/null)" || die "Something went wrong before installing. The previous binary was kept."
+  "$STAGED_BIN" --help >/dev/null 2>&1 || die "Something went wrong before installing. The previous binary was kept."
+  [ ! -d "$BIN_DIR/duet" ] || die "Cannot install Duet: $BIN_DIR/duet is a directory. Move it aside and try again."
+  mv -f "$STAGED_BIN" "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. The previous binary was kept."
+  STAGED_BIN=""
   # Compatibility aliases: the CLI was previously called Fable Code
   # (command `fable`), and before that Tera (command `tera`). Both keep
   # working as symlinks to `duet` so existing scripts and muscle memory
   # do not break.
-  ln -sf duet "$BIN_DIR/fable" 2>/dev/null || true
-  ln -sf duet "$BIN_DIR/tera" 2>/dev/null || true
+  ln -sf duet "$BIN_DIR/fable" 2>/dev/null || say "Warning: could not create the fable alias."
+  ln -sf duet "$BIN_DIR/tera" 2>/dev/null || say "Warning: could not create the tera alias."
 
   # --- PATH ---------------------------------------------------------------
   # Add BIN_DIR to the shell startup file only when it is not already on
@@ -178,11 +204,12 @@ main() {
     *)
       RC_FILE=""
       case "${SHELL:-}" in
+        *fish) PATH_NOTE="fish" ;;
         *zsh) RC_FILE="$HOME/.zshrc" ;;
         *bash)
           if [ "$OS" = "Darwin" ]; then RC_FILE="$HOME/.bash_profile"; else RC_FILE="$HOME/.bashrc"; fi ;;
       esac
-      if [ -z "$RC_FILE" ]; then
+      if [ -z "$RC_FILE" ] && [ "$PATH_NOTE" != "fish" ]; then
         if [ -f "$HOME/.zshrc" ]; then RC_FILE="$HOME/.zshrc";
         elif [ -f "$HOME/.bashrc" ]; then RC_FILE="$HOME/.bashrc";
         elif [ -f "$HOME/.bash_profile" ]; then RC_FILE="$HOME/.bash_profile"; fi
@@ -191,37 +218,42 @@ main() {
         if [ "$BIN_DIR" = "$HOME/.local/bin" ]; then
           PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'
         else
-          PATH_LINE="export PATH=\"$BIN_DIR:\$PATH\""
+          PATH_LINE="export PATH=$(shell_quote "$BIN_DIR"):\"\$PATH\""
         fi
         if grep -Fqx "$PATH_LINE" "$RC_FILE" 2>/dev/null; then
-          PATH_NOTE="restart"
+          PATH_NOTE="existing"
         elif printf '%s\n' "$PATH_LINE" >> "$RC_FILE" 2>/dev/null; then
           PATH_NOTE="restart"
         else
           PATH_NOTE="manual"
         fi
-      else
+      elif [ "$PATH_NOTE" != "fish" ]; then
         PATH_NOTE="manual"
       fi
       ;;
   esac
 
-  # --- verify -------------------------------------------------------------
-  "$BIN_DIR/duet" --version >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
-  "$BIN_DIR/duet" --help >/dev/null 2>&1 || die "Something went wrong after installing. Please try again."
-
   # --- done ---------------------------------------------------------------
   stop_spinner
+  say "Installed Duet $INSTALLED_VERSION at $BIN_DIR/duet"
   if [ "$PATH_NOTE" = "restart" ]; then
     say "✓ Installed"
+    say "Updated $RC_FILE"
     say "Restart your terminal, then run \`duet\`."
+  elif [ "$PATH_NOTE" = "fish" ]; then
+    say "✓ Installed"
+    FISH_DIR="$(printf '%s' "$BIN_DIR" | sed 's/[\\$"`]/\\&/g')"
+    say "Run: fish_add_path \"$FISH_DIR\"; then run \`duet\`."
+  elif [ "$PATH_NOTE" = "existing" ]; then
+    say "✓ Installed"
+    say "Open a new terminal, then run \`duet\`."
   elif [ "$PATH_NOTE" = "manual" ]; then
     say "✓ Installed"
     say "Add $BIN_DIR to your PATH, then run \`duet\`."
   else
     say "✓ Installed — run \`duet\`"
   fi
-  say "Need help? Run \`duet help\` or visit duet.lat"
+  say "Need help? Run \`duet --help\` or visit duet.lat"
 }
 
 main "$@"
