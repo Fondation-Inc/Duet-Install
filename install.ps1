@@ -98,7 +98,7 @@ try {
 
   # --- install --------------------------------------------------------------
   New-Item -ItemType Directory -Force -Path $binDir | Out-Null
-  $binDir = (Get-Item -LiteralPath $binDir).FullName
+  $binDir = (Get-Item -LiteralPath $binDir -Force).FullName
   $stagedFile = Join-Path $binDir (".duet-" + [Guid]::NewGuid().ToString("N") + ".exe")
   Copy-Item -LiteralPath $tmpFile -Destination $stagedFile
   $installedVersion = & $stagedFile --version
