@@ -8,7 +8,7 @@ This repository contains **only** the installer. It contains no Duet source code
 
 > This repository was previously named `fable-install`. The GitHub repo
 > rename to `duet-install` has landed; the installer points at the new
-> name. v0.1.0 is the first release published as Duet.
+> name. v0.0.1 is the prepared first public release; it is not published yet.
 
 ## Install
 
@@ -39,9 +39,9 @@ duet doctor
 ## Update
 
 Re-run the same install command to install the latest release (or set
-`DUET_VERSION`, e.g. `DUET_VERSION=v0.1.0`, to install a different
+`DUET_VERSION`, e.g. `DUET_VERSION=v0.0.1`, to install a different
 release; `FABLE_VERSION` still works as a fallback). If latest-release lookup
-fails, the installer falls back to v0.1.0. Your data in `~/.duet` is kept.
+fails, the installer falls back to v0.0.1. Your data in `~/.duet` is kept.
 
 ## Uninstall
 
@@ -70,7 +70,7 @@ Docs: https://www.fondation.ink/fable/docs/fable-code/install/
 
 ## Releases
 
-Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The exact file names and checksums for the current release are in [`versions.json`](versions.json).
+Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The exact file names and checksums for the prepared v0.0.1 release are in [`versions.json`](versions.json). Until publication, GitHub's latest-release endpoint still selects the existing published release.
 
 Supported platforms:
 
@@ -85,16 +85,16 @@ Supported platforms:
 | Windows x64 | `duet-bun-windows-x64.exe` |
 | Windows arm64 | `duet-bun-windows-arm64.exe` |
 
-> v0.1.0 note: the `sha256` values in `versions.json` are the real
-> v0.1.0 binary hashes, generated from the published release assets.
+> v0.0.1 note: the `sha256` values in `versions.json` are the real
+> v0.0.1 binary hashes, generated from the local release candidates.
 > The installer refuses to install on any checksum mismatch, so a
 > stale hash can never install a wrong binary; it just fails closed.
 
 ## Status
 
-- macOS/Linux installer: verified on Linux x64 for v0.1.0 (anonymous install via the published release, `duet --version` and `fable --version` both print `0.1.0`, `duet doctor` exit 0; installed as `duet` with `fable`/`tera` aliases).
+- macOS/Linux installer: previously verified on Linux x64 via the published release, including version checks, `duet doctor` exit 0, and `fable`/`tera` aliases. The v0.0.1 candidates are not published yet.
 - Windows installer: verified natively on Windows Server 2022 x64 with PowerShell 5.1 and 7. ARM64 has not been tested.
-- The other platform binaries are published from the same build and their file formats were verified, but they were not executed on their native platforms here.
+- The v0.0.1 platform candidates were cross-built together and their file formats were verified. Only Linux x64 (glibc and musl) was executed here; Windows/macOS/ARM64 candidate execution is unverified.
 
 ---
 
