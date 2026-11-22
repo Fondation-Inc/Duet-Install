@@ -183,6 +183,7 @@ main() {
   chmod +x "$STAGED_BIN" 2>/dev/null || die "Something went wrong. Please try again."
   INSTALLED_VERSION="$("$STAGED_BIN" --version 2>/dev/null)" || die "Something went wrong before installing. The previous binary was kept."
   "$STAGED_BIN" --help >/dev/null 2>&1 || die "Something went wrong before installing. The previous binary was kept."
+  [ ! -d "$BIN_DIR/duet" ] || die "Cannot install Duet: $BIN_DIR/duet is a directory. Move it aside and try again."
   mv -f "$STAGED_BIN" "$BIN_DIR/duet" 2>/dev/null || die "Something went wrong. The previous binary was kept."
   STAGED_BIN=""
   # Compatibility aliases: the CLI was previously called Fable Code

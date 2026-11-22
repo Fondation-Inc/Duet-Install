@@ -105,7 +105,7 @@ try {
   if ($LASTEXITCODE -ne 0) { Die "'duet --help' failed before install. The previous binary was kept." }
   $installedFile = Join-Path $binDir "duet.exe"
   if (Test-Path -LiteralPath $installedFile) {
-    [System.IO.File]::Replace($stagedFile, $installedFile, $null)
+    [System.IO.File]::Replace($stagedFile, $installedFile, [NullString]::Value)
   } else {
     [System.IO.File]::Move($stagedFile, $installedFile)
   }
