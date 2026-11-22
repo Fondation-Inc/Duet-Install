@@ -3,11 +3,6 @@
 # One-line install (run in Windows PowerShell, not as Administrator):
 #   irm https://duet.lat/install.ps1 | iex
 #
-# STATUS: NOT TESTED - written from the macOS/Linux installer, but never
-# executed on Windows (no Windows machine was available in this
-# environment). Do not present the Windows path as verified until someone
-# runs it on real Windows and confirms `duet --version` prints a version.
-#
 # What it does:
 #   1. Detects your CPU (x64/arm64).
 #   2. Downloads the matching prebuilt Duet binary from the public
@@ -146,4 +141,3 @@ Say "  duet login      Sign in with your Fable account"
 Say "  duet --help     See all commands"
 Say "  Docs: https://www.fondation.ink/fable/docs/fable-code/install/"
 Say "Update later by re-running this same installer."
-Say "NOTE: this Windows installer has NOT been tested on Windows yet."

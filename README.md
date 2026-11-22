@@ -93,7 +93,7 @@ Supported platforms:
 ## Status
 
 - macOS/Linux installer: verified on Linux x64 for v0.1.0 (anonymous install via the published release, `duet --version` and `fable --version` both print `0.1.0`, `duet doctor` exit 0; installed as `duet` with `fable`/`tera` aliases).
-- Windows installer: written from the macOS/Linux installer; **not tested on real Windows yet**. Treat it as untested until someone runs it on Windows and confirms `duet --version`.
+- Windows installer: verified natively on Windows Server 2022 x64 with PowerShell 5.1 and 7. ARM64 has not been tested.
 - The other platform binaries are published from the same build and their file formats were verified, but they were not executed on their native platforms here.
 
 ---
