@@ -38,14 +38,14 @@ duet doctor
 
 ## Update
 
-Re-run the same install command to reinstall the same release (or set
+Re-run the same install command to install the latest release (or set
 `DUET_VERSION`, e.g. `DUET_VERSION=v0.1.0`, to install a different
-release; `FABLE_VERSION` still works as a fallback). Your data in
-`~/.fable` is kept.
+release; `FABLE_VERSION` still works as a fallback). If latest-release lookup
+fails, the installer falls back to v0.1.0. Your data in `~/.duet` is kept.
 
 ## Uninstall
 
-Delete the installed files; your data in `~/.fable` is kept unless you delete it yourself.
+Delete the installed files; your data in `~/.duet` is kept unless you delete it yourself.
 
 macOS/Linux:
 
