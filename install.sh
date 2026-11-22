@@ -22,7 +22,7 @@
 # above still happens — it just stays silent unless something fails, in
 # which case you get one short, plain message and nothing is installed.
 #
-# To install a different release, set DUET_VERSION (e.g. v0.0.1).
+# To install a different release, set DUET_VERSION (e.g. duet-v0.0.1).
 # FABLE_VERSION still works as a fallback. To update later, re-run this
 # same command. To uninstall, delete $HOME/.local/bin/duet,
 # $HOME/.local/bin/fable and $HOME/.local/bin/tera; your data in ~/.duet
@@ -155,7 +155,7 @@ main() {
     LATEST_URL="$(curl -fsSL --retry 2 --connect-timeout 10 --max-time 30 -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" 2>/dev/null)" || LATEST_URL=""
     case "$LATEST_URL" in
       https://github.com/*/releases/tag/?*) VERSION="${LATEST_URL##*/}" ;;
-      *) VERSION="v0.0.1" ;;
+      *) VERSION="duet-v0.0.1" ;;
     esac
   fi
   VERSIONS_URL="https://raw.githubusercontent.com/$REPO/$VERSION/versions.json"

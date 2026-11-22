@@ -8,7 +8,9 @@ This repository contains **only** the installer. It contains no Duet source code
 
 > This repository was previously named `fable-install`. The GitHub repo
 > rename to `duet-install` has landed; the installer points at the new
-> name. v0.0.1 is the prepared first public release; it is not published yet.
+> name. duet-v0.0.1 (CLI version 0.0.1) is the prepared first public release;
+> it is not published yet. Existing v0.0.x tags/releases belong to legacy Fable
+> releases and must never be reused, deleted, or overwritten.
 
 ## Install
 
@@ -39,9 +41,13 @@ duet doctor
 ## Update
 
 Re-run the same install command to install the latest release (or set
-`DUET_VERSION`, e.g. `DUET_VERSION=v0.0.1`, to install a different
+`DUET_VERSION`, e.g. `DUET_VERSION=duet-v0.0.1`, to install a different
 release; `FABLE_VERSION` still works as a fallback). If latest-release lookup
-fails, the installer falls back to v0.0.1. Your data in `~/.duet` is kept.
+fails, the installer falls back to duet-v0.0.1. Your data in `~/.duet` is kept.
+
+Version overrides are literal release tags, not normalized version numbers.
+Use `duet-v0.0.1`, not `0.0.1` or `v0.0.1`: the latter forms are not aliases
+for the Duet release and may select legacy Fable content or fail.
 
 ## Uninstall
 
@@ -70,7 +76,7 @@ Docs: https://www.fondation.ink/fable/docs/fable-code/install/
 
 ## Releases
 
-Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The exact file names and checksums for the prepared v0.0.1 release are in [`versions.json`](versions.json). Until publication, GitHub's latest-release endpoint still selects the existing published release.
+Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The exact file names and checksums for the prepared duet-v0.0.1 release are in [`versions.json`](versions.json). Until publication, GitHub's latest-release endpoint still selects the existing published release. After separate publication approval, explicitly mark duet-v0.0.1 as Latest rather than relying on automatic version ordering. The manifest must be present on main and at tag duet-v0.0.1.
 
 Supported platforms:
 
@@ -85,8 +91,8 @@ Supported platforms:
 | Windows x64 | `duet-bun-windows-x64.exe` |
 | Windows arm64 | `duet-bun-windows-arm64.exe` |
 
-> v0.0.1 note: the `sha256` values in `versions.json` are the real
-> v0.0.1 binary hashes, generated from the local release candidates.
+> duet-v0.0.1 note: the `sha256` values in `versions.json` are the real
+> CLI 0.0.1 binary hashes, generated from the local release candidates.
 > The installer refuses to install on any checksum mismatch, so a
 > stale hash can never install a wrong binary; it just fails closed.
 
