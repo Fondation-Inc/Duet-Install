@@ -1,1 +1,38 @@
-{"assets":{"darwin-arm64":{"file":"duet-bun-darwin-arm64","sha256":"a025e1193f2babd7f7e227cd4f9c3b776e9714e6d52ea78d9adaf36131d5b3b1"},"darwin-x64":{"file":"duet-bun-darwin-x64","sha256":"3512d0c28ef48cddc3ab078ab25f42fa7ee5481ad558017ea0cbec2846f5634f"},"linux-arm64":{"file":"duet-bun-linux-arm64","sha256":"8cd3dc13fa917e4d176035c6c8d1e08405fd257a5bb24fc88dfc8d731db608a6"},"linux-arm64-musl":{"file":"duet-bun-linux-arm64-musl","sha256":"bf21a64ddd3d6368e3f8a9b49ab187d3479a64bd696850f9fc641a92bd7beff0"},"linux-x64":{"file":"duet-bun-linux-x64","sha256":"35fb0d1c7089fe4d514a80cc5e0be32bb88dd543ebcb9180a27bf45b3fedb946"},"linux-x64-musl":{"file":"duet-bun-linux-x64-musl","sha256":"c30f069f28f121ade40fa0c161bfdc9ea86e6d0b5da043d5ae3d1f33a3cef2e7"},"windows-arm64":{"file":"duet-bun-windows-arm64.exe","sha256":"e82ac9121b38bf5860e0a1406bf1cd43e98b8e6756a69b1c6a26555a7d8eaa64"},"windows-x64":{"file":"duet-bun-windows-x64.exe","sha256":"fe665b766b7f837157969735381616bef99483b4c118a64d189c2976f68e6fe6"}},"release":"duet-v0.0.1","version":"0.0.1"}
+{
+  "assets": {
+    "darwin-arm64": {
+      "file": "duet-bun-darwin-arm64",
+      "sha256": "3e43368cd71c722e41769b54e8134a6f5ea8668dac69539a8114c85d86201aeb"
+    },
+    "darwin-x64": {
+      "file": "duet-bun-darwin-x64",
+      "sha256": "fe681271aaeb6f3c5a0406f6a562653444360847eec9bd4ec666b9cf47a77036"
+    },
+    "linux-arm64": {
+      "file": "duet-bun-linux-arm64",
+      "sha256": "4d176ed0a3f47a5d85220f4204b4ab2da726acba5c6850f5439b2daaf18585ed"
+    },
+    "linux-arm64-musl": {
+      "file": "duet-bun-linux-arm64-musl",
+      "sha256": "0de85ea3b093f1ce1889bc00e602b733468ac925bf48b2945a270dcd85bd060e"
+    },
+    "linux-x64": {
+      "file": "duet-bun-linux-x64",
+      "sha256": "57daa44eb333016f56356cb2787147ccee073fd25a040d19d6d5a62c99107e84"
+    },
+    "linux-x64-musl": {
+      "file": "duet-bun-linux-x64-musl",
+      "sha256": "dec3de1dbef8b8480d3b309ef50d8e552beff583e610ce4d30775ab628d96cd2"
+    },
+    "windows-arm64": {
+      "file": "duet-bun-windows-arm64.exe",
+      "sha256": "876abafb5323e1c7e0c81a54e80b7740a5b85cb23d7c1e3178aa9fb110d2f713"
+    },
+    "windows-x64": {
+      "file": "duet-bun-windows-x64.exe",
+      "sha256": "d7b786086816cc81bf48753c813198485e7a3a163b791370f339cc906c2435ad"
+    }
+  },
+  "release": "duet-v0.0.1",
+  "version": "0.0.1"
+}
