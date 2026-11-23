@@ -2,35 +2,35 @@
   "assets": {
     "darwin-arm64": {
       "file": "duet-bun-darwin-arm64",
-      "sha256": "3e43368cd71c722e41769b54e8134a6f5ea8668dac69539a8114c85d86201aeb"
+      "sha256": "8f0be6ab956ee1b40d6efad56c92ece06ec7e18541256307f2f27116d4edaaf7"
     },
     "darwin-x64": {
       "file": "duet-bun-darwin-x64",
-      "sha256": "fe681271aaeb6f3c5a0406f6a562653444360847eec9bd4ec666b9cf47a77036"
+      "sha256": "61e3c9823600575a79974015faa489c7f5944bca9b09438254b408858474df64"
     },
     "linux-arm64": {
       "file": "duet-bun-linux-arm64",
-      "sha256": "4d176ed0a3f47a5d85220f4204b4ab2da726acba5c6850f5439b2daaf18585ed"
+      "sha256": "0bf5f36f6345831365a3fc143a05d9bee16b67f20a9b26166c1ab3ee4245dfa7"
     },
     "linux-arm64-musl": {
       "file": "duet-bun-linux-arm64-musl",
-      "sha256": "0de85ea3b093f1ce1889bc00e602b733468ac925bf48b2945a270dcd85bd060e"
+      "sha256": "86b0ea5ae2dba7d6790417549f96417555026e96329abe62e2da9be951add040"
     },
     "linux-x64": {
       "file": "duet-bun-linux-x64",
-      "sha256": "57daa44eb333016f56356cb2787147ccee073fd25a040d19d6d5a62c99107e84"
+      "sha256": "eb2bae7cf28caa37e4460ba11aec7920639ea972a04d47dc77ad51cb2f2d37a7"
     },
     "linux-x64-musl": {
       "file": "duet-bun-linux-x64-musl",
-      "sha256": "dec3de1dbef8b8480d3b309ef50d8e552beff583e610ce4d30775ab628d96cd2"
+      "sha256": "51417d84f1c254ca471abcb14a32002183378c5a6c114c8a3f17985f258bcc37"
     },
     "windows-arm64": {
       "file": "duet-bun-windows-arm64.exe",
-      "sha256": "876abafb5323e1c7e0c81a54e80b7740a5b85cb23d7c1e3178aa9fb110d2f713"
+      "sha256": "6f533fa0f1d4b6ad21879b05065967dbae96c1b15a18fcdf04ed7ab0f5941ab6"
     },
     "windows-x64": {
       "file": "duet-bun-windows-x64.exe",
-      "sha256": "d7b786086816cc81bf48753c813198485e7a3a163b791370f339cc906c2435ad"
+      "sha256": "1cf9f166ef8e3ef4c028a3fdfdf8c9f8e90fc6d5dc1f0e834041ff9cb74acbed"
     }
   },
   "release": "duet-v0.0.1",
