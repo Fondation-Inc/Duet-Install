@@ -178,3 +178,50 @@ Public desktop installers and `electron-updater` channel `duet` metadata are hos
 | Release checksums | `SHA256SUMS.txt` |
 
 > Note: [`desktop-manifest.example.json`](desktop-manifest.example.json) documents the expected `desktop-v0.0.1` asset layout only; real SHA-256 digests and `electron-updater` YAML feeds are generated from signed release binaries when `desktop-v0.0.1` is published.
+
+---
+
+## Repository layout
+
+| Path | Role |
+| --- | --- |
+| `install.sh` | macOS/Linux installer (POSIX sh, bash-3.2 safe). Detects OS/arch/libc, resolves the release via `versions.json`, verifies SHA-256, installs `duet` plus `fable`/`tera` aliases into `$DUET_BIN_DIR` (default `~/.local/bin`) |
+| `install.ps1` | Windows installer (PowerShell 5.1+ and 7), installing into `%LOCALAPPDATA%\FableCode\bin` (legacy folder name kept on purpose — it's on users' PATH) |
+| `install-server.sh` | Idempotent Linux host bootstrap for Duet Desktop's remote-computer flow (`DUET_JSON=1` emits NDJSON for the SSH "Add your own server" flow) |
+| `versions.json` | Release manifest: tag, version, per-platform file names and SHA-256. Served at `main/versions.json` and read by the installers and `duet update` |
+| `desktop-manifest.example.json` | Template for a future Desktop release manifest |
+| `scripts/test-install-server.sh` | Local test harness for `install-server.sh` |
+
+## How the installer reaches users
+
+`https://duet.lat/install.sh`, `install.ps1` and `install-server.sh` are `vercel.json` rewrites in **Duet-Website** pointing at **commit-pinned GitHub raw URLs** in `Fondation-Inc/Duet-Install`. So shipping an installer change takes three steps, all verified by Duet-Website's `npm run check:installers`:
+
+1. Merge the change into this repo's `main` on GitLab.
+2. Fast-forward the GitHub mirror `Fondation-Inc/Duet-Install` to the same commit (it is not automatic; compare SHAs with `git ls-remote`).
+3. Bump the pinned URLs in Duet-Website's `vercel.json` if the target files moved.
+
+Binaries themselves are downloaded from **GitHub Releases** in `Fondation-Inc/Duet-Install` — `versions.json` at the release tag is the manifest of record.
+
+## Cutting a release
+
+- Build the platform binaries from Duet-CLI (`apps/cli/script/package-release.ts` builds assets + `versions.json`; public builds need `DUET_PUBLIC_BUILD=1`).
+- Attach `duet-bun-<os>-<arch>[.exe]` for every platform plus `SHA256SUMS` to a GitHub release tagged `duet-v<version>`.
+- `duet update` reads `main/versions.json` and only upgrades to a higher semver; mark the intended release **Latest** explicitly.
+- Never reuse or delete `v0.0.x` tags — they belong to legacy Fable releases (`fable-bun-*`).
+
+## Installer environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `DUET_VERSION` | Release tag to install (e.g. `duet-v0.0.1`); `FABLE_VERSION` is the fallback |
+| `DUET_BIN_DIR` | Install directory (default `~/.local/bin`); `FABLE_BIN_DIR` fallback |
+| `DUET_INSTALL_MUSL` | Force the musl build on ambiguous libc detection; `FABLE_INSTALL_MUSL` fallback |
+| `DUET_JSON` | `install-server.sh` NDJSON output mode for Desktop's SSH flow |
+
+## Related repositories
+
+| Repo | Role |
+| --- | --- |
+| [Duet-CLI](https://gitlab.com/Leonnett/Duet-CLI) | Builds the binaries this repo distributes |
+| [Duet-Website](https://gitlab.com/Leonnett/Duet-Website) | Serves the installer URLs via `vercel.json` rewrites |
+| [Duet-Desktop](https://gitlab.com/Leonnett/Duet-Desktop) | Consumes `install-server.sh` for remote computers |
