@@ -1077,9 +1077,18 @@ extract_and_stage() {
   fi
 
   cp -Rp "$_payload_root"/. "$_stage_dir"/
+  # The executable path is part of the install trust boundary. A symlink in
+  # the archive could make chmod or the later --version probe operate on a
+  # path outside this isolated staging directory.
+  if [ -L "$_stage_dir/bin" ] || { [ -e "$_stage_dir/bin" ] && [ ! -d "$_stage_dir/bin" ]; }; then
+    die "INVALID_ARTIFACT" "Archive contains an unsafe 'bin' path." "Ensure the Duet Server bundle contains a real bin directory, not a symlink or file."
+  fi
   mkdir -p "$_stage_dir/bin"
   if [ ! -f "$_stage_dir/bin/duet-server" ] && [ -f "$_stage_dir/duet-server" ]; then
     mv "$_stage_dir/duet-server" "$_stage_dir/bin/duet-server"
+  fi
+  if [ -L "$_stage_dir/bin/duet-server" ] || [ ! -f "$_stage_dir/bin/duet-server" ]; then
+    die "INVALID_ARTIFACT" "Archive does not contain a regular 'duet-server' executable." "Ensure the Duet Server bundle includes the executable as a regular file, not a symlink."
   fi
   chmod 0755 "$_stage_dir/bin/duet-server"
 }

@@ -102,8 +102,36 @@ EOF
 
   TAR_NAME="duet-server-0.0.1-linux.tar.gz"
   RAW_NAME="duet-server-0.0.1-linux-raw"
+  SYMLINK_NAME="duet-server-0.0.1-linux-symlink.tar.gz"
+  MALICIOUS_BIN="$HOST_DIR/malicious-server.sh"
+  MALICIOUS_MARKER="$HOST_DIR/malicious-server-executed"
   tar -czf "$HOST_DIR/$TAR_NAME" -C "$PAYLOAD_DIR" .
   cp "$PAYLOAD_DIR/bin/duet-server" "$HOST_DIR/$RAW_NAME"
+
+  cat > "$MALICIOUS_BIN" <<EOF
+#!/bin/sh
+printf 'unexpected execution\n' > '$MALICIOUS_MARKER'
+if [ "\${1:-}" = "--version" ]; then
+  printf 'duet-server 0.0.99\n'
+  exit 0
+fi
+exit 0
+EOF
+  chmod 0755 "$MALICIOUS_BIN"
+  python3 - "$HOST_DIR/$SYMLINK_NAME" "$MALICIOUS_BIN" <<'PY'
+import sys, tarfile
+
+archive, target = sys.argv[1:]
+with tarfile.open(archive, "w:gz") as out:
+    directory = tarfile.TarInfo("bin/")
+    directory.type = tarfile.DIRTYPE
+    directory.mode = 0o755
+    out.addfile(directory)
+    executable = tarfile.TarInfo("bin/duet-server")
+    executable.type = tarfile.SYMTYPE
+    executable.linkname = target
+    out.addfile(executable)
+PY
 
   PORT_FILE="$TMP_ROOT/http.port"
   ENROLL_LOG="$TMP_ROOT/enroll.log"
@@ -158,10 +186,10 @@ PY
   PORT="$(cat "$PORT_FILE")"
 
   # Build manifests with real SHA-256 digests
-  python3 - "$HOST_DIR" "$TAR_NAME" "$RAW_NAME" "$PORT" <<'PY'
+  python3 - "$HOST_DIR" "$TAR_NAME" "$RAW_NAME" "$SYMLINK_NAME" "$PORT" <<'PY'
 import hashlib, json, os, sys
 
-host_dir, tar_name, raw_name, port = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+host_dir, tar_name, raw_name, symlink_name, port = sys.argv[1:]
 
 def sha256_file(path):
     h = hashlib.sha256()
@@ -176,6 +204,8 @@ def sha256_file(path):
 tar_sha = sha256_file(os.path.join(host_dir, tar_name))
 tar_size = os.path.getsize(os.path.join(host_dir, tar_name))
 raw_sha = sha256_file(os.path.join(host_dir, raw_name))
+symlink_sha = sha256_file(os.path.join(host_dir, symlink_name))
+symlink_size = os.path.getsize(os.path.join(host_dir, symlink_name))
 bad_sha = ("0" if tar_sha[0] != "0" else "1") + tar_sha[1:]
 
 plats = ["linux-x64", "linux-arm64", "linux-x64-musl", "linux-arm64-musl"]
@@ -203,6 +233,21 @@ manifest_raw = {
         p: {
             "file": raw_name,
             "sha256": raw_sha,
+        }
+        for p in plats
+    },
+}
+
+manifest_symlink = {
+    "version": "0.0.1",
+    "release": "server-v0.0.1",
+    "runtime": "bundled",
+    "assets": {
+        p: {
+            "file": symlink_name,
+            "url": f"http://127.0.0.1:{port}/{symlink_name}",
+            "sha256": symlink_sha,
+            "size": symlink_size,
         }
         for p in plats
     },
@@ -237,6 +282,7 @@ manifest_insecure = {
 for name, obj in [
     ("server-manifest.json", manifest),
     ("server-manifest-raw.json", manifest_raw),
+    ("server-manifest-symlink.json", manifest_symlink),
     ("server-manifest-bad-sha.json", manifest_bad_sha),
     ("server-manifest-insecure.json", manifest_insecure),
 ]:
@@ -315,6 +361,19 @@ PY
   [ -x "$HOME_RAW/.local/bin/duet-server" ] || fail "Raw binary symlink missing"
   [ "$("$HOME_RAW/.local/bin/duet-server" --version)" = "duet-server 0.0.1" ] || fail "Raw binary execution check failed"
   pass "Piped bash install with raw standalone binary"
+
+  # A bundle must not point its executable at an external host path.
+  HOME_SYMLINK="$TMP_ROOT/home_symlink"
+  mkdir -p "$HOME_SYMLINK"
+  if env -i HOME="$HOME_SYMLINK" PATH="$PATH" DUET_JSON=1 \
+    DUET_SERVER_MANIFEST_URL="http://127.0.0.1:$PORT/server-manifest-symlink.json" \
+    sh "$INSTALLER" >"$TMP_ROOT/symlink.out" 2>&1; then
+    fail "Archive with an external duet-server symlink unexpectedly succeeded"
+  fi
+  grep -Fq '"code":"INVALID_ARTIFACT"' "$TMP_ROOT/symlink.out" || fail "Expected INVALID_ARTIFACT for symlinked duet-server"
+  [ ! -e "$MALICIOUS_MARKER" ] || fail "Installer executed the external symlink target during verification"
+  [ ! -e "$HOME_SYMLINK/.duet/server/current" ] || fail "Symlinked executable was installed"
+  pass "Archive symlink to an external duet-server is rejected before execution"
 
   # 7. Test 4: SHA-256 mismatch FAILS CLOSED (nothing installed)
   HOME_BAD="$TMP_ROOT/home_bad"

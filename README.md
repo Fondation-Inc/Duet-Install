@@ -8,9 +8,9 @@ This repository contains **only** the installer. It contains no Duet source code
 
 > This repository was previously named `fable-install`. The GitHub repo
 > rename to `duet-install` has landed; the installer points at the new
-> name. duet-v0.0.1 (CLI version 0.0.1) is the prepared first public release;
-> it is not published yet. Existing v0.0.x tags/releases belong to legacy Fable
-> releases and must never be reused, deleted, or overwritten.
+> name. `duet-v0.0.1` (CLI version `0.0.1`) is the first public Duet release,
+> published on 2026-11-22. Existing unprefixed `v0.0.x` tags/releases belong to
+> legacy Fable releases and must never be reused, deleted, or overwritten.
 
 ## Install
 
@@ -76,7 +76,7 @@ Docs: https://www.fondation.ink/fable/docs/fable-code/install/
 
 ## Releases
 
-Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The exact file names and checksums for the prepared duet-v0.0.1 release are in [`versions.json`](versions.json). Until publication, GitHub's latest-release endpoint still selects the existing published release. After separate publication approval, explicitly mark duet-v0.0.1 as Latest rather than relying on automatic version ordering. The manifest must be present on main and at tag duet-v0.0.1.
+Each release ships one prebuilt binary per supported platform plus `SHA256SUMS`. The published `duet-v0.0.1` release has all eight platform assets; the exact file names and checksums are in [`versions.json`](versions.json). The manifest at tag `duet-v0.0.1` matches every entry in the published `SHA256SUMS`, and GitHub's latest-release endpoint currently resolves to `duet-v0.0.1`. Explicitly mark each intended release as Latest rather than relying on automatic version ordering. Keep the manifest present on `main` and at each release tag.
 
 Supported platforms:
 
@@ -98,9 +98,9 @@ Supported platforms:
 
 ## Status
 
-- macOS/Linux installer: previously verified on Linux x64 via the published release, including version checks, `duet doctor` exit 0, and `fable`/`tera` aliases. The v0.0.1 candidates are not published yet.
-- Windows installer: verified natively on Windows Server 2022 x64 with PowerShell 5.1 and 7. ARM64 has not been tested.
-- The v0.0.1 platform candidates were cross-built together and their file formats were verified. Only Linux x64 (glibc and musl) was executed here; Windows/macOS/ARM64 candidate execution is unverified.
+- Installer script: the recorded Linux x64 install check used an earlier published release; it does not certify installation of the current `duet-v0.0.1` release.
+- Windows installer script: repository test notes record a run on Windows Server 2022 x64 with PowerShell 5.1 and 7. The published Windows binaries have not been run on Windows; ARM64 has not been tested.
+- The `duet-v0.0.1` assets were cross-built together and their file formats were verified. Repository test notes report executing Linux x64 (glibc and musl) release candidates. macOS, Windows, and ARM64 binary execution is unverified.
 
 ---
 
